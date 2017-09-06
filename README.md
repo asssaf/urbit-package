@@ -37,7 +37,7 @@ Unfortunately, you can't use `%package` to install itself if it's not already in
 ### Urbit Sync
 You can sync from `~dotnub-pocfex-mislep-davtex--faltyv-mallex-macfet-faspur`'s `%package` desk.
 ```
-dojo> |sync %package ~dotnub-pocfex-mislep-davtex--faltyv-mallex-macfet-faspur $package  
+dojo> |sync %package ~dotnub-pocfex-mislep-davtex--faltyv-mallex-macfet-faspur %package  
 ```
 
 ### Manual
