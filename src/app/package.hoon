@@ -22,6 +22,7 @@
 ++  poke-noun
   |=  a/action
   ^-  (quip move +>)
+  ?>  (team our.hid src.hid)      :: don't allow strangers
   ?-  a
   {$install *}
     :_  +>.$
