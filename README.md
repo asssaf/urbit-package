@@ -32,7 +32,7 @@ The package specification defines package metadata (name, etc.) as well as all t
 
 ## Install
 
-Unfortunately, you can't use `%package` to install itself if it's not already installed, so the traditional methods are available (you can use the `package.json` in this repository to install `%package` if it's already installed, but why would you want to?).
+Unfortunately, you can't use `%package` to install itself if it's not already installed, so the traditional methods are available (once installed, you can use the `package.json` in this repository to install updated versions).
 
 ### Urbit Sync
 You can sync from `~dotnub-pocfex-mislep-davtex--faltyv-mallex-macfet-faspur`'s `%package` desk.
