@@ -53,6 +53,7 @@ Poke with a desk and a URL of a package specification.
 The URL can point to any web server. It can be a github page of a published package or a local web server for local development (instead of manually copying your app files from your local git repo to the urbit unix mount on every change).
 
 ### Dojo
+#### Install Package
 ```
 > |merge %packageapp our %base
 > :package [%install %packageapp (need (epur 'https://github.com/asssaf/urbit-package/package.json'))]
@@ -65,10 +66,28 @@ For copying local dev app:
 
 Note: When using `++  epur` with `http://localhost` it will set the secure flag and this will cause an http parse error. You can use something like `http://localhost.localdomain` as a workaround (assuming it is defined in `/etc/hosts`).
 
+#### List Installed Packages
+```
+> :package [%installed %packageapp]
+{%package}
+```
+
+#### List Package Contents
+```
+> :package [%contents %packageapp %package]
+```
+
+#### Find Package Owning a File
+```
+> :package [%belongs %packageapp /app/package/hoon]
+[~ %package]
+```
+
+#### Uninstall Package
+```
+> :package [%uninstall %packageapp %package]
+```
 
 ## Future
-* Make the app stateful
-  * Support uninstall
-  * Detect conflicts / changed files
 * Web interface for installing packages without the dojo
 * Poll URLs for changes and autosync (copy changed files as soon as they're save in your IDE)
