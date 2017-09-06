@@ -21,9 +21,9 @@ The package specification defines package metadata (name, etc.) as well as all t
       "type": "fileset",
       "base": "https://raw.githubusercontent.com/asssaf/urbit-package/master/src",
       "rels": [
-        "/sur/package/hoon",
-        "/mar/package/package/hoon",
-        "/app/package/hoon"
+        "/sur/package.hoon",
+        "/mar/package/package.hoon",
+        "/app/package.hoon"
       ]
     }
   ]

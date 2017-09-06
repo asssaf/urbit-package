@@ -1,0 +1,16 @@
+{
+  "name": "package",
+  "description": "A package manager for urbit",
+  "homepage": "https://github.com/asssaf/urbit-package",
+  "items": [
+    {
+      "type": "fileset",
+      "base": "https://raw.githubusercontent.com/asssaf/urbit-package/master/src",
+      "rels": [
+        "/sur/package.hoon",
+        "/mar/package/package.hoon",
+        "/app/package.hoon"
+      ]
+    }
+  ]
+}
