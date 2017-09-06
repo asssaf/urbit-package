@@ -30,6 +30,22 @@ The package specification defines package metadata (name, etc.) as well as all t
 }
 ```
 
+## Install
+
+Unfortunately, you can't use `%package` to install itself if it's not already installed, so the traditional methods are available (you can use the `package.json` in this repository to install `%package` if it's already installed, but why would you want to?).
+
+### Urbit Sync
+You can sync from `~dotnub-pocfex-mislep-davtex--faltyv-mallex-macfet-faspur`'s `%package` desk.
+```
+dojo> |sync %package ~dotnub-pocfex-mislep-davtex--faltyv-mallex-macfet-faspur $package  
+```
+
+### Manual
+Assuming you have a desk mounted:
+```
+$ cp -a src/* /path/to/pier/home/
+```
+
 ## Usage
 
 Poke with a desk and a URL of a package specification.
