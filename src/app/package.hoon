@@ -72,18 +72,32 @@
   %+  turn  rels.fs
   |=  pax/path
   %^    fetch-url
-      (weld way pax)
+      (weld way (ext-to-mark pax))
     %httr
   (extend-url base.fs pax)
 ::
 ++  extend-url
   |=  {url/purl pax/path}
-  =+  rev=(flop pax)
-  ~!  rev=rev
-  =+  revbase=+>.rev
-  =+  file=(rap 3 +<.rev '.' -.rev ~)
-  =+  new=(flop [i=file t=revbase])
-  url(q.q (weld q.q.url new))
+  (scan "{(earn url)}{(spud pax)}" auri:epur)
+::
+++  ext-to-mark
+  |=  pax/path
+  =+  revpax=(flop pax)
+  ?>  ?=(^ revpax)
+  =+  [last rest]=revpax
+  =+  rev=(flop (rip 3 last))
+  =+  r=rev
+  =+  i=0
+  =/  j
+  |-
+    ?~  r
+      i
+    ?:  =(-.r '.')
+      i
+    $(i +(i), r +.r)
+  =+  mar=(rep 3 (flop (scag j rev)))
+  =+  fil=(rep 3 (flop (slag +(j) rev)))
+  (flop [i=mar [t=[i=fil t=rest]]])
 ::
 ++  fetch-url
   |=  {way/wire mar/mark url/purl}
