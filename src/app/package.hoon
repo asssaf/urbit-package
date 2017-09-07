@@ -2,24 +2,19 @@
 ::::  /hoon/package/app
   ::
 /-  package
+/+  package-promise
+[package-promise .]
 !:
 |%
 ++  move  {bone card}
 ++  card
   $%  {$info wire @p toro}
+      {$poke wire {@p $package} $package-action action:package}
       {$hiss wire $~ mark {$purl purl}}
   ==
-++  action
-  $%  {$installed d/desk}
-      {$install d/desk p/package-item:package}
-      {$uninstall d/desk p/pname}
-      {$verify d/desk p/pname}
-      {$contents d/desk p/pname}
-      {$belongs d/desk pax/path}
-  ==
-++  pname  @tas
+++  pname  pname:package
 ++  installed-package
-  $:  name/@tas
+  $:  name/pname
       files/(map path installed-file)
   ==
 ++  installed-file
@@ -33,9 +28,15 @@
   $:  $0
       side/(map desk desk-state)
   ==
+++  queue-package
+  $%  {$& package:package}           :: package waiting for dependencies
+      {$| package-item:package}      :: dependency url
+  ==
 ++  desk-state
-  $:  packages/(map pname installed-package)
-      files/(map path pname)
+  $:  packages/(map pname installed-package)   :: files by package
+      files/(map path pname)                   :: file to owning package
+      queue/(list queue-package)               :: package install queue
+      work/(map pname (promise mime))          :: per-package pending work
   ==
 --
 ::
@@ -43,7 +44,14 @@
 ::++  prep  _`.
 ::
 ++  poke-noun
-  |=  a/action
+  |=  a/*
+  ^-  (quip move +>)
+  %-  poke-package-action
+  ~|  [%strange-action a]
+  ;;(action:package a)
+::
+++  poke-package-action
+  |=  a/action:package
   ^-  (quip move +>)
   ?>  (team our.hid src.hid)      :: don't allow strangers
   ?-  a
@@ -51,8 +59,9 @@
     {$contents *}  (list-package-contents +.a)
     {$belongs *}  (belongs +.a)
     {$verify *}  (verify-package +.a)
-    {$install *}  [(install-package-item +.a) +>.$]
+    {$install *}  (install-package-item +.a)
     {$uninstall *}  (uninstall-package +.a)
+    {$resume *}  (install-next-package +.a)
   ==
 ::
 ++  list-packages
@@ -173,20 +182,89 @@
 ::
 ++  install-package-item
   |=  {syd/desk pack/package-item:package}
-  ^-  (list move)
-  =+  way=/install/package/[syd]
-  [(fetch-url way %package-package pack) ~]
+  ^-  (quip move +>)
+  (install-package-items syd [%| pack]~)
 ::
+++  install-package-items
+  |=  {syd/desk packs/(list queue-package)}
+  ^-  (quip move +>)
+  =+  ds=(fall (~(get by side) syd) *desk-state)
+  =.  side
+  %+  ~(put by side)  syd
+  ds(queue (weld packs queue.ds))
+  (install-next-package syd)
+::
+++  install-next-package
+  |=  syd/desk
+  ^-  (quip move +>)
+  =+  ds=(~(get by side) syd)
+  ?~  ds
+    [~ +>.$]
+  ?~  queue.u.ds
+    [~ +>.$]
+  =+  qp=-.queue.u.ds
+  ?-  qp
+  {$& *}
+    :: a package that was waiting for its dependencies
+    :: since it's at the top of the queue we can install it now
+    (install-package syd +.qp)
+  {$| *}
+    :: remove from queue and fetch
+    =.  side  (pop-package-queue syd)
+    =+  way=/install/package/[syd]
+    :_  +>.$
+    [(fetch-url way %package-package +.qp)]~
+  ==
+::
+++  pop-package-queue
+  |=  syd/desk
+  =+  ds=(~(got by side) syd)
+  %+  ~(put by side)
+    syd
+  ds(queue +.queue.ds)
+::
+++  install-package-dependencies
+  |=  {syd/desk pack/package:package}
+  ^-  (quip move +>)
+  ~&  [%checking-prerequities for=name.pack]
+  =/  package-items
+  ^-  (list package-item:package)
+  %+  murn  items.pack
+  |=  it/item:package
+  ?+  it  ~
+  {$package *}  (some +.it)
+  ==
+  ?:  =(~ package-items)
+    :: no dependencies, move on to the next item in the queue
+    (install-next-package syd)
+  :: insert the dependencies to the queue
+  %+  install-package-items  syd
+  %+  turn  package-items
+  |=  {p/package-item:package}
+  [%| p]
+::
+:: install a package that has its dependencies installed already
 ++  install-package
   |=  {syd/desk pack/package:package}
   ^-  (quip move +>)
-  :_  +>.$
+  =+  ds=(~(got by side) syd)
+  :: check that the package is not already pending
+  ?:  (~(has by work.ds) name.pack)
+    ~&  [%package-already-pending name.pack]
+    [~ +>.$]
+  :: check that the package is not already installed
   ?:  (is-package-installed syd name.pack)
     ~&  [%package-already-installed name.pack]
-    ~
-  :: check if there are existing files in the way
-  =/  conflicts
-  %+  murn
+    :: remove from queue and resume
+    =.  side  (pop-package-queue syd)
+    (install-next-package syd)
+  (install-package-files syd pack)
+::
+++  install-package-files
+  |=  {syd/desk pack/package:package}
+  ~&  [%installing name.pack]
+  :: get paths from all filesets
+  =/  paths
   ^-  (list path)
   %-  zing
   ^-  (list (list path))
@@ -194,52 +272,87 @@
   |=  it/item:package
   ?.  ?=($fileset -.it)
     ~
-  (some rels.it)
+  %-  some
+  %+  turn  rels.it
   |=  pax/path
-  =+  marpax=(ext-to-mark pax)
-  ?~  (file (relpath-to-abs syd marpax))
+  (ext-to-mark pax)
+  :: check if there are existing files in the way
+  =/  conflicts
+  %+  murn  paths
+  |=  pax/path
+  ?~  (file (relpath-to-abs syd pax))
     ~
-  ~&  [%conflict pax=marpax]
+  ~&  [%conflict pax=pax]
   (some pax)
   ?.  =((lent conflicts) 0)
     ~&  %move-files-manually
-    ~
+    [~ +>.$]
   :: no conflicts - go ahead and install
+  =.  side  (register-work syd name.pack paths)
+  :_  +>.$
   %-  zing
-  %+  turn  items.pack
+  ^-  (list (list move))
+  %+  murn  items.pack
   |=  it/item:package
-  ?-  it
-  {$fileset *}
-    %+  fetch-fileset
-      /install/file/[syd]/[name.pack]
-    +.it
-  {$package *}
-    %+  install-package-item
-      syd
-    +.it
+  ?.  ?=($fileset -.it)
+    ~
+  %-  some
+  %+  fetch-fileset
+    /install/file/[syd]/[name.pack]
+  +.it
+::
+++  register-work
+  |=  {syd/desk pan/pname paths/(list path)}
+  =+  ds=(fall (~(get by side) syd) *desk-state)
+  %+  ~(put by side)
+    syd
+  %=  ds
+    work
+      %+  ~(put by work.ds)
+        pan
+      (~(reqs pro *(promise mime)) paths)
   ==
 ::
-++  install-file
-  |=  {syd/desk pan/pname pax/path mim/mime}
-  ~&  [%writing desk=syd pname=pan pax=pax]
-  :-  (write-file syd pax mim)
-  =+  ds=(fall (~(get by side) syd) *desk-state)
-  =+  pin=(fall (~(get by packages.ds) pan) [pan files=~])
-  =+  f=[pax (shax q.q.mim)]
-  =+  files=(~(put by files.pin) pax f)
+++  install-files
+  |=  {syd/desk pan/pname files/(list {path mime})}
+  ^-  (quip move +>)
+  :-  :~  (write-files syd files)
+          [ost.hid %poke /resume/[syd] [our.hid %package] %package-action [%resume syd]]
+      ==
+  =+  ds=(~(got by side) syd)
+  :: add sha to files - for installed-package map
+  =/  installed-files
+  %-  malt
+  %+  turn  files
+  |=  {pax/path mim/mime}
+  [pax [pax (shax q.q.mim)]]
+  :: add package name - for files map
+  =/  files-to-package
+  %-  malt
+  %+  turn  files
+  |=  {pax/path mim/mime}
+  [pax pan]
+  :: update state
   =.  side
   %+  ~(put by side)  syd
   %=  ds
-    packages  (~(put by packages.ds) pan pin(files files))
-    files  (~(put by files.ds) pax pan)
+    packages  (~(put by packages.ds) pan [pan installed-files])
+    files  files-to-package
+    queue  +.queue.ds
   ==
   +>.$
 ::
-++  write-file
-  |=  {syd/desk pax/path mim/mime}
-  ^-  (list move)
-  =+  wr=(foal (relpath-to-abs syd pax) [%mime !>(mim)])
-  [ost.hid %info /writing our.hid wr]~
+++  write-files
+  |=  {syd/desk files/(list {path mime})}
+  ^-  move
+  =/  wr
+  :*  syd
+      %&
+      %+  turn  files
+      |=  {pax/path mim/mime}
+      [pax [%ins [%mime !>(mim)]]]
+  ==
+  [ost.hid %info /writing our.hid wr]
 ::
 ++  fetch-fileset
   |=  {way/wire fs/fileset-item:package}
@@ -255,6 +368,8 @@
   |=  {url/purl pax/path}
   (scan "{(earn url)}{(spud pax)}" auri:epur)
 ::
+:: if the last part of the path has an extension turn it into a mark
+:: e.g.:  /foo/bar/baz.js -> /foo/bar/baz/js
 ++  ext-to-mark
   |=  pax/path
   ^-  path
@@ -293,7 +408,18 @@
 ++  sigh-package-package
   |=  {way/wire pack/package:package}
   =+  syd=(snag 2 way)
-  (install-package syd pack)
+  =+  queue-package=[%& pack]
+  :: check that it's not already in the queue
+  =+  ds=(~(got by side) syd)
+  ?^  (find [queue-package]~ queue.ds)
+    ~&  [%already-queued name.pack]
+    [~ +>.$]
+  :: add to queue
+  =.  side
+  %+  ~(put by side)  syd
+  ds(queue [queue-package queue.ds])
+  :: check prerequisites
+  (install-package-dependencies syd pack)
 ::
 ++  sigh-httr
   |=  {way/wire res/httr}
@@ -304,7 +430,32 @@
     ~|  [%unexpected-wire way=way]
     !!
   =+  syd=(snag 2 way)
-  (install-file syd (snag 3 way) (slag 4 way) [/application/octet-stream (need r.res)])
+  =+  pan=(snag 3 way)
+  =+  pax=(slag 4 way)
+  (file-fetched syd pan pax [/application/octet-stream (need r.res)])
+::
+++  file-fetched
+  |=  {syd/desk pan/pname pax/path mim/mime}
+  ^-  (quip move +>)
+  =+  ds=(~(got by side) syd)
+  =/  prom
+  %+  ~(res pro (~(got by work.ds) pan))
+    pax
+  mim
+  =.  side
+  %+  ~(put by side)
+    syd
+  %=  ds
+    work
+      ?~  pending.prom
+        (~(del by work.ds) pan)
+      (~(put by work.ds) pan prom)
+  ==
+  ?~  pending.prom
+    :: all files received - install them
+    (install-files syd pan (~(tap by done.prom)))
+  :: still waiting for other requests
+  [~ +>.$]
 ::
 ++  sigh-tang
   |=  {way/wire tan/tang}
