@@ -62,8 +62,15 @@
     {$install *}  (install-package-item +.a)
     {$uninstall *}  (uninstall-package +.a)
     {$resume *}  (install-next-package +.a)
+    {$help *}  (help +.a)
   ==
 ::
+++  help
+  |=  a/@tas
+  ^-  (quip move +>)
+  =+  h=(~(get by action-help:package) a)
+  ~&  ?~  h  action-help:package  [a u.h]
+  [~ +>.$]
 ++  list-packages
   |=  syd/desk
   ~&  (installed-packages syd)

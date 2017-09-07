@@ -55,37 +55,43 @@ The URL can point to any web server. It can be a github page of a published pack
 ### Dojo
 #### Install Package
 ```
-> |merge %packageapp our %base
-> :package [%install %packageapp (need (epur 'https://github.com/asssaf/urbit-package/package.json'))]
+> |merge %packagedesk our %base
+> :package [%install %packagedesk (need (epur 'https://github.com/asssaf/urbit-package/package.json'))]
 ```
 
 For copying local dev app:
 ```
-:package [%install %mydevapp (need (epur 'http://localhost.localdomain:8080/pages/packages/mypackage.json'))
+:package [%install %mydevdesk (need (epur 'http://localhost.localdomain:8080/pages/packages/mypackage.json'))
 ```
 
 Note: When using `++  epur` with `http://localhost` it will set the secure flag and this will cause an http parse error. You can use something like `http://localhost.localdomain` as a workaround (assuming it is defined in `/etc/hosts`).
 
 #### List Installed Packages
 ```
-> :package [%installed %packageapp]
+> :package [%installed %packagedesk]
 {%package}
 ```
 
 #### List Package Contents
 ```
-> :package [%contents %packageapp %package]
+> :package [%contents %packagedesk %package]
 ```
 
 #### Find Package Owning a File
 ```
-> :package [%belongs %packageapp /app/package/hoon]
+> :package [%belongs %packagedesk /app/package/hoon]
 [~ %package]
 ```
 
 #### Uninstall Package
 ```
-> :package [%uninstall %packageapp %package]
+> :package [%uninstall %packagedesk %package]
+```
+
+#### Resume
+Resume in case installation stopped (e.g. due to conflict):
+```
+> : package [%resume %packagedesk]
 ```
 
 ## Future
