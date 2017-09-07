@@ -123,17 +123,7 @@
   ?.  (is-package-installed syd pan)
     ~&  [%package-is-not-installed pan]
     [~ +>.$]
-  =+  ds=(~(got by side) syd)
-  =/  ds
-  %_  ds
-    packages  (~(del by packages.ds) pan)
-    files
-      %-  malt
-      %+  skip  (~(tap by files.ds) ~)
-      |=  {pax/path p/pname}
-      =(pan p)
-  ==
-  :_  +>.$(side (~(put by side) syd ds))
+  :_  +>.$(side (remove-package-from-desk-state syd pan))
   =+  file-states=(verify-files syd pan)
   =/  modified
   %+  skim  file-states
@@ -149,14 +139,36 @@
       %info
       /uninstall/[pan]
       our.hid
-      syd
-      %&
+      %+  delete-files
+        syd
       %+  murn  file-states
       |=  {f/installed-file s/installed-file-state}
       ?.  ?=($verified -.s)
         ~
-      %-  some
-      [pax.f [%del ~]]
+      (some pax.f)
+  ==
+::
+++  remove-package-from-desk-state
+  |=  {syd/desk pan/pname}
+  =+  ds=(~(got by side) syd)
+  %+  ~(put by side)  syd
+  %_  ds
+    packages  (~(del by packages.ds) pan)
+    files
+      %-  malt
+      %+  skip  (~(tap by files.ds) ~)
+      |=  {pax/path p/pname}
+      =(pan p)
+  ==
+::
+++  delete-files
+  |=  {syd/desk paths/(list path)}
+  ^-  toro
+  :*  syd
+      %&
+      %+  turn  paths
+      |=  pax/path
+      [pax [%del ~]]
   ==
 ::
 ++  install-package-item
