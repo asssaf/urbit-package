@@ -8,9 +8,11 @@
 |%
 ++  move  {bone card}
 ++  card
-  $%  {$info wire @p toro}
-      {$poke wire {@p $package} $package-action action:package}
+  $%  {$info wire ship toro}
+      {$poke wire {ship $package} $package-action action:package}
       {$hiss wire $~ mark {$purl purl}}
+      {$warp wire sock riff}
+      {$merg wire ship desk ship desk case germ}
   ==
 ++  pname  pname:package
 ++  installed-package
@@ -33,10 +35,9 @@
       {$| package-item:package}      :: dependency url
   ==
 ++  desk-state
-  $:  packages/(map pname installed-package)   :: files by package
-      files/(map path pname)                   :: file to owning package
-      queue/(list queue-package)               :: package install queue
+  $:  queue/(list queue-package)               :: package install queue
       work/(map pname (promise mime))          :: per-package pending work
+      deps/(jar pname pname)                   :: dependencies
   ==
 --
 ::
@@ -55,137 +56,25 @@
   ^-  (quip move +>)
   ?>  (team our.hid src.hid)      :: don't allow strangers
   ?-  a
-    {$installed *}  (list-packages +.a)
-    {$contents *}  (list-package-contents +.a)
-    {$belongs *}  (belongs +.a)
-    {$verify *}  (verify-package +.a)
     {$install *}  (install-package-item +.a)
-    {$uninstall *}  (uninstall-package +.a)
     {$resume *}  (install-next-package +.a)
     {$help *}  (help +.a)
   ==
-::
 ++  help
   |=  a/@tas
   ^-  (quip move +>)
   =+  h=(~(get by action-help:package) a)
   ~&  ?~  h  action-help:package  [a u.h]
   [~ +>.$]
-++  list-packages
-  |=  syd/desk
-  ~&  (installed-packages syd)
-  [~ +>.$]
-::
-++  installed-packages
-  |=  syd/desk
-  %+  biff  (~(get by side) syd)
-  |=  ds/desk-state
-  ~(key by packages.ds)
 ::
 ++  is-package-installed
-  |=  {syd/desk pan/pname}
-  (~(has in (installed-packages syd)) pan)
-::
-++  list-package-contents
-  |=  {syd/desk pan/pname}
-  :_  +>.$
-  %+  biff  (~(get by side) syd)
-  |=  ds/desk-state
-  %+  biff  (~(get by packages.ds) pan)
-  |=  pin/installed-package
-  ~&  ~(val by files.pin)
-  ~
-::
-++  belongs
-  |=  {syd/desk pax/path}
-  :_  +>.$
-  %+  biff  (~(get by side) syd)
-  |=  ds/desk-state
-  ~&  (~(get by files.ds) pax)
-  ~
-::
-++  verify-package
-  |=  {syd/desk pan/pname}
-  :_  +>.$
-  %+  murn  (verify-files syd pan)
-  |=  {f/installed-file s/installed-file-state}
-  ~&  [-.s pax.f]
-  ~
-::
-++  verify-files
-  |=  {syd/desk pan/pname}
-  %+  biff  (~(get by side) syd)
-  |=  ds/desk-state
-  %+  biff  (~(get by packages.ds) pan)
-  |=  pin/installed-package
-  %+  turn  ~(val by files.pin)
-  |=  f/installed-file
-  [f=f s=(verify-file syd f)]
-::
-++  verify-file
-  |=  {syd/desk f/installed-file}
-  ^-  installed-file-state
-  =+  cot=(file (relpath-to-abs syd pax.f))
-  ?~  cot
-    [%missing ~]
-  ?>  ?=(@ u.cot)
-  ?.  =(has.f (shax u.cot))
-    [%modified cur=(shax u.cot)]
-  [%verified ~]
-::
-++  uninstall-package
-  |=  {syd/desk pan/pname}
-  ^-  (quip move +>)
-  ?.  (is-package-installed syd pan)
-    ~&  [%package-is-not-installed pan]
-    [~ +>.$]
-  :_  +>.$(side (remove-package-from-desk-state syd pan))
-  =+  file-states=(verify-files syd pan)
-  =/  modified
-  %+  skim  file-states
-  |=  {f/installed-file s/installed-file-state}
-  =+  m=?=($modified -.s)
-  ~?  m  [-.s pax.f]
-  m
-  ?.  =((lent modified) 0)
-    ~&  %remove-modified-files-manually
-    ~
-  :_  ~
-  :*  ost.hid
-      %info
-      /uninstall/[pan]
-      our.hid
-      %+  delete-files
-        syd
-      %+  murn  file-states
-      |=  {f/installed-file s/installed-file-state}
-      ?.  ?=($verified -.s)
-        ~
-      (some pax.f)
-  ==
-::
-++  remove-package-from-desk-state
-  |=  {syd/desk pan/pname}
-  =+  ds=(~(got by side) syd)
-  %+  ~(put by side)  syd
-  %_  ds
-    packages  (~(del by packages.ds) pan)
-    files
-      %-  malt
-      %+  skip  (~(tap by files.ds) ~)
-      |=  {pax/path p/pname}
-      =(pan p)
-  ==
-::
-++  delete-files
-  |=  {syd/desk paths/(list path)}
-  ^-  toro
-  :*  syd
-      %&
-      %+  turn  paths
-      |=  pax/path
-      [pax [%del ~]]
-  ==
+  |=  {syd/desk pack/package:package}
+  =+  pd=(package-desk syd name.pack)
+  ?.  (desk-exists pd)
+    |
+  ?.  =(hash.pack .^(@uvI cz+(base pd)))
+    |
+  &
 ::
 ++  install-package-item
   |=  {syd/desk pack/package-item:package}
@@ -201,20 +90,27 @@
   ds(queue (weld packs queue.ds))
   (install-next-package syd)
 ::
+++  get-next-package
+  |=  syd/desk
+  ^-  (unit queue-package)
+  %+  biff  (~(get by side) syd)
+  |=  ds/desk-state
+  ?~  queue.ds
+    ~
+  `-.queue.ds
+::
 ++  install-next-package
   |=  syd/desk
   ^-  (quip move +>)
-  =+  ds=(~(get by side) syd)
-  ?~  ds
+  =+  qp=(get-next-package syd)
+  ?~  qp
     [~ +>.$]
-  ?~  queue.u.ds
-    [~ +>.$]
-  =+  qp=-.queue.u.ds
+  =+  qp=u.qp
   ?-  qp
   {$& *}
     :: a package that was waiting for its dependencies
-    :: since it's at the top of the queue we can install it now
-    (install-package syd +.qp)
+    :: since it's at the top of the queue we can merge its deps now
+    (merge-deps syd name.+.qp &)
   {$| *}
     :: remove from queue and fetch
     =.  side  (pop-package-queue syd)
@@ -233,6 +129,18 @@
 ++  install-package-dependencies
   |=  {syd/desk pack/package:package}
   ^-  (quip move +>)
+  =+  ds=(~(got by side) syd)
+  :: check that the package is not already pending
+  ?:  (~(has by work.ds) name.pack)
+    ~&  [%package-already-pending name.pack]
+    [~ +>.$]
+  :: check that the package is not already installed
+  ?:  (is-package-installed syd pack)
+    ~&  [%package-already-installed name.pack]
+    :: remove from queue and resume
+    =.  side  (pop-package-queue syd)
+    =.  side  (record-dependency syd name.pack)
+    (install-next-package syd)
   ~&  [%checking-prerequities for=name.pack]
   =/  package-items
   ^-  (list package-item:package)
@@ -250,25 +158,28 @@
   |=  {p/package-item:package}
   [%| p]
 ::
+++  record-dependency
+  |=  {syd/desk pan/pname}
+  =+  ds=(~(got by side) syd)
+  :: find next %& package in the queue
+  =+  queue=queue.ds
+  =/  dep
+  ^-  (unit pname)
+  |-
+    ?~  queue
+      ~
+    ?.  ?=({$& *} -.queue)
+      $(queue +.queue)
+    (some name.->.queue)
+  ?~  dep
+    side
+  %+  ~(put by side)  syd
+  ds(deps (~(add ja deps.ds) u.dep pan))
+::
 :: install a package that has its dependencies installed already
 ++  install-package
   |=  {syd/desk pack/package:package}
   ^-  (quip move +>)
-  =+  ds=(~(got by side) syd)
-  :: check that the package is not already pending
-  ?:  (~(has by work.ds) name.pack)
-    ~&  [%package-already-pending name.pack]
-    [~ +>.$]
-  :: check that the package is not already installed
-  ?:  (is-package-installed syd name.pack)
-    ~&  [%package-already-installed name.pack]
-    :: remove from queue and resume
-    =.  side  (pop-package-queue syd)
-    (install-next-package syd)
-  (install-package-files syd pack)
-::
-++  install-package-files
-  |=  {syd/desk pack/package:package}
   ~&  [%installing name.pack]
   :: get paths from all filesets
   =/  paths
@@ -283,18 +194,6 @@
   %+  turn  rels.it
   |=  pax/path
   (ext-to-mark pax)
-  :: check if there are existing files in the way
-  =/  conflicts
-  %+  murn  paths
-  |=  pax/path
-  ?~  (file (relpath-to-abs syd pax))
-    ~
-  ~&  [%conflict pax=pax]
-  (some pax)
-  ?.  =((lent conflicts) 0)
-    ~&  %move-files-manually
-    [~ +>.$]
-  :: no conflicts - go ahead and install
   =.  side  (register-work syd name.pack paths)
   :_  +>.$
   %-  zing
@@ -323,31 +222,28 @@
 ++  install-files
   |=  {syd/desk pan/pname files/(list {path mime})}
   ^-  (quip move +>)
-  :-  :~  (write-files syd files)
-          [ost.hid %poke /resume/[syd] [our.hid %package] %package-action [%resume syd]]
-      ==
   =+  ds=(~(got by side) syd)
-  :: add sha to files - for installed-package map
-  =/  installed-files
-  %-  malt
-  %+  turn  files
-  |=  {pax/path mim/mime}
-  [pax [pax (shax q.q.mim)]]
-  :: add package name - for files map
-  =/  files-to-package
-  %-  malt
-  %+  turn  files
-  |=  {pax/path mim/mime}
-  [pax pan]
-  :: update state
+  =+  qp=-.queue.ds
+  ?>  ?=({$& *} qp)
+  =+  hash=(scot %uv hash.+.qp)
+  =+  pd=(package-desk syd pan)
+  :-  :~  (subscribe-for-next-commit /install/file/[syd]/[pan]/[hash] pd)
+          (write-files pd files)
+      ==
   =.  side
   %+  ~(put by side)  syd
   %=  ds
-    packages  (~(put by packages.ds) pan [pan installed-files])
-    files  files-to-package
     queue  +.queue.ds
   ==
   +>.$
+::
+++  subscribe-for-next-commit
+  |=  {way/wire syd/desk}
+  ^-  move
+  =+  dom=.^(dome cv+(base syd))
+  =+  let=+(let.dom)
+  =+  rav=[%sing %y ud+let /]
+  [ost.hid %warp way [our.hid our.hid] [syd (some rav)]]
 ::
 ++  write-files
   |=  {syd/desk files/(list {path mime})}
@@ -360,6 +256,22 @@
       [pax [%ins [%mime !>(mim)]]]
   ==
   [ost.hid %info /writing our.hid wr]
+::
+++  writ-install-file
+  |=  {way/wire rot/riot}
+  ?~  rot
+    [~ +>.$]
+  =+  syd=(snag 0 way)
+  =+  pan=`pname`(snag 1 way)
+  =+  has=`@uv`(slav %uv (snag 2 way))
+  =+  was=.^(@uv cz+(base (package-desk syd pan)))
+  ?.  =(has was)
+    ~&  [%invalid-hash package=pan expected=has was=was]
+    [~ +>.$]
+  =.  side  (record-dependency syd pan)
+  ~&  [%installed name=`pname`pan hash=was]
+  (install-next-package syd)
+  :: TODO add label
 ::
 ++  fetch-fileset
   |=  {way/wire fs/fileset-item:package}
@@ -411,6 +323,45 @@
 ++  relpath-to-abs
   |=  {syd/desk pax/path}
   (weld (base syd) pax)
+::
+++  desk-exists
+  |=  syd/desk
+  =+  ark=.^(arch cy+(base syd))
+  !=(~ dir.ark)
+::
+++  package-desk
+  |=  {syd/desk pan/pname}
+  ^-  desk
+  (rap 3 syd '-' pan ~)
+::
+++  merge-deps
+  |=  {syd/desk pan/pname first/?}
+  ^-  (quip move +>)
+  =+  ds=(~(got by side) syd)
+  =+  deps=(~(get ja deps.ds) pan)
+  ?~  deps
+    ?.  first
+      =+  qp=(need (get-next-package syd))
+      ?>  ?=({$& *} qp)
+      (install-package syd +.qp)
+    :: no depndencies - reset to %base if needed
+    :_  +>.$
+    [ost.hid %merg /merge/[syd]/[pan] our.hid (package-desk syd pan) our.hid %base da+now.hid %that]~
+  :: remove dep
+  =.  side
+  %+  ~(put by side)  syd
+  ds(deps (~(put by deps.ds) pan +.deps))
+  :_  +>.$
+  [ost.hid %merg /merge/[syd]/[pan] our.hid (package-desk syd pan) our.hid (package-desk syd -.deps) da+now.hid ?:(first %that %meet)]~
+::
+++  mere-merge
+  |=  {wir/wire are/(each (set path) (pair term tang))}
+  ?.  ?=({$.y *} are)
+    ~&  [%merge-conflicts +.are]
+    [~ +>.$]
+  =+  syd=-.wir
+  =+  pan=+<.wir
+  (merge-deps syd pan |)
 ::
 ++  sigh-package-package
   |=  {way/wire pack/package:package}

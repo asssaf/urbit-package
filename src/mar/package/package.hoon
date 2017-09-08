@@ -14,8 +14,11 @@
     |%
     ++  purl-parser
       =+  jo
-      (cu |=(a/@t (need (epur a))) so)
+      (ci |=(a/@t (epur a)) so)
     ::
+    ++  hash-parser
+      =+  jo
+      (ci |=(a/@t (slaw %uv a)) so)
     ++  rels-parser
       =+  jo
       (ar (cu |=(a/@t (stab a)) so))
@@ -44,7 +47,7 @@
     ::
     ++  package-parser
       =+  jo
-      (ot name+so items+(ar item-parser) ~)
+      (ot name+so hash+hash-parser items+(ar item-parser) ~)
     --
   --
 --
