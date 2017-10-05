@@ -1,7 +1,7 @@
 {
   "name": "package",
   "description": "A package manager for urbit",
-  "hash": "0v1d.c2ost.l5rnp.9mpjh.hll8n.qdbai.gcbe1.h857b.871pg.iuv8g.1foio",
+  "hash": "0v1u.mrmnj.s06n8.ikpn1.t574m.4c8le.c4tr2.08dpk.28ojf.fbpsi.vmvlp",
   "homepage": "https://github.com/asssaf/urbit-package",
   "items": [
     {
@@ -12,7 +12,8 @@
         "/lib/package/promise.hoon",
         "/mar/package/action.hoon",
         "/mar/package/package.hoon",
-        "/app/package.hoon"
+        "/app/package.hoon",
+        "/gen/package/install.hoon"
       ]
     }
   ]

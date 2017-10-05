@@ -57,12 +57,12 @@ The URL can point to any web server. It can be a github page of a published pack
 #### Install Package
 Install a package into a desk with %xyz prefix (will create %xyz-package desk)
 ```
-> :package [%install %xyz (need (epur 'https://raw.githubusercontent.com/asssaf/urbit-package/master/package.json'))]
+> :package|install %xyz "https://raw.githubusercontent.com/asssaf/urbit-package/master/package.json"
 ```
 
 For copying local dev app:
 ```
-:package [%install %dev (need (epur 'http://localhost.localdomain:8080/pages/packages/mypackage.json'))]
+:package|install %dev "http://localhost.localdomain:8080/pages/packages/mypackage.json"
 ```
 
 Note: When using `++  epur` with `http://localhost` it will set the secure flag and this will cause an http parse error. You can use something like `http://localhost.localdomain` as a workaround (assuming it is defined in `/etc/hosts`).
@@ -70,7 +70,7 @@ Note: When using `++  epur` with `http://localhost` it will set the secure flag 
 #### Resume
 Resume in case installation stopped:
 ```
-> : package [%resume %packagedesk]
+> :package [%resume %xyz]
 ```
 
 ## Future
