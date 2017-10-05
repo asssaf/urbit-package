@@ -11,7 +11,7 @@ The package specification defines package metadata (name, etc.) as well as all t
 {
   "name": "package",
   "description": "A package manager for urbit",
-  "hash": "0vg.dk490.mq164.aia0o.06up6.6miom.uuav2.2fg44.eaqj1.cin5n.pidt2",
+  "hash": "0vg.frcc0.nh5a0.trbqa.1rqe5.3c1tq.kg69n.8fo2f.jkcuo.ge1gc.tdd59",
   "homepage": "https://github.com/asssaf/urbit-package",
   "items": [
     {
@@ -57,12 +57,12 @@ The URL can point to any web server. It can be a github page of a published pack
 #### Install Package
 Install a package into a desk with %xyz prefix (will create %xyz-package desk)
 ```
-> :package [%install %xyz (need (epur 'https://github.com/asssaf/urbit-package/package.json'))]
+> :package [%install %xyz (need (epur 'https://raw.githubusercontent.com/asssaf/urbit-package/master/package.json'))]
 ```
 
 For copying local dev app:
 ```
-:package [%install %dev (need (epur 'http://localhost.localdomain:8080/pages/packages/mypackage.json'))
+:package [%install %dev (need (epur 'http://localhost.localdomain:8080/pages/packages/mypackage.json'))]
 ```
 
 Note: When using `++  epur` with `http://localhost` it will set the secure flag and this will cause an http parse error. You can use something like `http://localhost.localdomain` as a workaround (assuming it is defined in `/etc/hosts`).

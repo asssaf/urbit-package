@@ -37,7 +37,7 @@
 ++  desk-state
   $:  queue/(list queue-package)               :: package install queue
       work/(map pname (promise mime))          :: per-package pending work
-      deps/(jar pname pname)                   :: dependencies
+      deps/(jar pname {pan/pname has/@uv})     :: dependencies
   ==
 --
 ::
@@ -72,9 +72,7 @@
   =+  pd=(package-desk syd name.pack)
   ?.  (desk-exists pd)
     |
-  ?.  =(hash.pack .^(@uvI cz+(base pd)))
-    |
-  &
+  (label-exists pd (hash-to-label hash.pack))
 ::
 ++  install-package-item
   |=  {syd/desk pack/package-item:package}
@@ -139,7 +137,7 @@
     ~&  [%package-already-installed name.pack]
     :: remove from queue and resume
     =.  side  (pop-package-queue syd)
-    =.  side  (record-dependency syd name.pack)
+    =.  side  (record-dependency syd name.pack hash.pack)
     (install-next-package syd)
   ~&  [%checking-prerequities for=name.pack]
   =/  package-items
@@ -159,7 +157,7 @@
   [%| p]
 ::
 ++  record-dependency
-  |=  {syd/desk pan/pname}
+  |=  {syd/desk pan/pname has/@uv}
   =+  ds=(~(got by side) syd)
   :: find next %& package in the queue
   =+  queue=queue.ds
@@ -174,7 +172,7 @@
   ?~  dep
     side
   %+  ~(put by side)  syd
-  ds(deps (~(add ja deps.ds) u.dep pan))
+  ds(deps (~(add ja deps.ds) u.dep [pan has]))
 ::
 :: install a package that has its dependencies installed already
 ++  install-package
@@ -245,6 +243,12 @@
   =+  rav=[%sing %y ud+let /]
   [ost.hid %warp way [our.hid our.hid] [syd (some rav)]]
 ::
+++  subscribe-to-label
+  |=  {way/wire syd/desk label/@tas}
+  ^-  move
+  =+  rav=[%sing %y tas+label /]
+  [ost.hid %warp way [our.hid our.hid] [syd (some rav)]]
+::
 ++  write-files
   |=  {syd/desk files/(list {path mime})}
   ^-  move
@@ -268,10 +272,57 @@
   ?.  =(has was)
     ~&  [%invalid-hash package=pan expected=has was=was]
     [~ +>.$]
-  =.  side  (record-dependency syd pan)
+  =.  side  (record-dependency syd pan has)
   ~&  [%installed name=`pname`pan hash=was]
+  :: create a label so the version can be address by content hash
+  =+  label=(hash-to-label has)
+  :_  +>.$
+  :~
+    (create-label syd pan label)
+    (subscribe-to-label /label/[syd]/[pan] (package-desk syd pan) label)
+  ==
+::
+++  writ-label
+  |=  {way/wire rot/riot}
+  ?~  rot
+    [~ +>.$]
+  =+  syd=(snag 0 way)
   (install-next-package syd)
-  :: TODO add label
+::
+:: labels can't start with anumber and can't contain dots so start with a
+:: letter and replace dots with dashes
+++  hash-to-label
+  |=  {has/@uv}
+  ^-  @tas
+  =+  lab=(cat 3 'h' (scot %uv has))
+  |-
+    ?:  =(lab '')
+      ''
+    =+  first=(end 3 1 lab)
+    %-  cat
+    :-  3
+    :_  $(lab (rsh 3 1 lab))
+    ?:  =(first '.')
+      '-'
+    first
+::
+++  create-label
+  |=  {syd/desk pan/pname label/@tas}
+  ^-  move
+  =+  pd=(package-desk syd pan)
+  :: check that label doesn't exist yet
+  ?:  (label-exists pd label)
+    ~|  [%label-already-exists label=label]
+    !!
+  [ost.hid %info /label/[syd]/[pan]/[label] our.hid pd %| label]
+::
+++  label-exists
+  |=  {syd/desk label/@tas}
+  ^-  @f
+  =+  dom=.^(dome cv+/=[syd]/[(scot %da now.hid)])
+  ?~  (~(get by lab.dom) label)
+    |
+  &
 ::
 ++  fetch-fileset
   |=  {way/wire fs/fileset-item:package}
@@ -344,7 +395,7 @@
       =+  qp=(need (get-next-package syd))
       ?>  ?=({$& *} qp)
       (install-package syd +.qp)
-    :: no depndencies - reset to %base if needed
+    :: no dependencies - reset to %base if needed
     :_  +>.$
     [ost.hid %merg /merge/[syd]/[pan] our.hid (package-desk syd pan) our.hid %base da+now.hid %that]~
   :: remove dep
@@ -352,7 +403,18 @@
   %+  ~(put by side)  syd
   ds(deps (~(put by deps.ds) pan +.deps))
   :_  +>.$
-  [ost.hid %merg /merge/[syd]/[pan] our.hid (package-desk syd pan) our.hid (package-desk syd -.deps) da+now.hid ?:(first %that %meet)]~
+  :_  ~
+  :*
+    ost.hid
+    %merg
+    /merge/[syd]/[pan]
+    our.hid
+    (package-desk syd pan)
+    our.hid
+    (package-desk syd -<.deps)
+    tas+(hash-to-label ->.deps)
+    ?:(first %that %meet)
+  ==
 ::
 ++  mere-merge
   |=  {wir/wire are/(each (set path) (pair term tang))}
