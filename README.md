@@ -11,6 +11,7 @@ The package specification defines package metadata (name, etc.) as well as all t
 {
   "name": "package",
   "description": "A package manager for urbit",
+  "hash": "0vg.frcc0.nh5a0.trbqa.1rqe5.3c1tq.kg69n.8fo2f.jkcuo.ge1gc.tdd59",
   "homepage": "https://github.com/asssaf/urbit-package",
   "items": [
     {
@@ -54,46 +55,24 @@ The URL can point to any web server. It can be a github page of a published pack
 
 ### Dojo
 #### Install Package
+Install a package into a desk with %xyz prefix (will create %xyz-package desk)
 ```
-> |merge %packagedesk our %base
-> :package [%install %packagedesk (need (epur 'https://github.com/asssaf/urbit-package/package.json'))]
+> :package [%install %xyz (need (epur 'https://raw.githubusercontent.com/asssaf/urbit-package/master/package.json'))]
 ```
 
 For copying local dev app:
 ```
-:package [%install %mydevdesk (need (epur 'http://localhost.localdomain:8080/pages/packages/mypackage.json'))
+:package [%install %dev (need (epur 'http://localhost.localdomain:8080/pages/packages/mypackage.json'))]
 ```
 
 Note: When using `++  epur` with `http://localhost` it will set the secure flag and this will cause an http parse error. You can use something like `http://localhost.localdomain` as a workaround (assuming it is defined in `/etc/hosts`).
 
-#### List Installed Packages
-```
-> :package [%installed %packagedesk]
-{%package}
-```
-
-#### List Package Contents
-```
-> :package [%contents %packagedesk %package]
-```
-
-#### Find Package Owning a File
-```
-> :package [%belongs %packagedesk /app/package/hoon]
-[~ %package]
-```
-
-#### Uninstall Package
-```
-> :package [%uninstall %packagedesk %package]
-```
-
 #### Resume
-Resume in case installation stopped (e.g. due to conflict):
+Resume in case installation stopped:
 ```
 > : package [%resume %packagedesk]
 ```
 
 ## Future
 * Web interface for installing packages without the dojo
-* Poll URLs for changes and autosync (copy changed files as soon as they're save in your IDE)
+* Poll URLs for changes and autosync (copy changed files as soon as they're saved in your IDE)
