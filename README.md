@@ -36,9 +36,9 @@ The package specification defines package metadata (name, etc.) as well as all t
 Unfortunately, you can't use `%package` to install itself if it's not already installed, so the traditional methods are available (once installed, you can use the `package.json` in this repository to install updated versions).
 
 ### Urbit Sync
-You can sync from `~bidner-hadlev-napler-pittev--livdyl-ritrev-ropwyc-bitpub`'s `%package` desk.
+You can sync from `~bidner-hadlev-napler-pittev--livdyl-ritrev-ropwyc-bitpub`'s `%dist-package` desk.
 ```
-dojo> |sync %package ~bidner-hadlev-napler-pittev--livdyl-ritrev-ropwyc-bitpub %package  
+dojo> |sync %home ~bidner-hadlev-napler-pittev--livdyl-ritrev-ropwyc-bitpub %dist-package  
 ```
 
 ### Manual
