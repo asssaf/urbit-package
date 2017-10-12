@@ -16,13 +16,15 @@
 ++  fileset-item  {base/purl rels/(list path)}
 ++  action
   $%  {$install d/desk p/package-item:package}
+      {$installed d/desk p/pname}
       {$resume d/desk}
       {$help @tas}
   ==
 ++  action-help
   %-  my
-  :~  [%install arg=["desk purl"] desc="Fetch and install a pacakge in  a desk"]
-      [%resume arg=["desk"] desc="Resume installation in a desk"]
+  :~  [%install arg=["desk-prefix purl"] desc="Fetch and install a pacakge in a prefix"]
+      [%installed arg=["desk-prefix package-name"] desc="List installed versions of a package in a prefix"]
+      [%resume arg=["desk-prefix"] desc="Resume installation in a prefix"]
       [%help arg=["action"] desc="Show help for action"]
   ==
 --

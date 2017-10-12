@@ -57,6 +57,7 @@
   ?>  (team our.hid src.hid)      :: don't allow strangers
   ?-  a
     {$install *}  (install-package-item +.a)
+    {$installed *}  (get-installed-versions +.a)
     {$resume *}  (install-next-package +.a)
     {$help *}  (help +.a)
   ==
@@ -73,6 +74,12 @@
   ?.  (desk-exists pd)
     |
   (label-exists pd (hash-to-label hash.pack))
+::
+++  get-installed-versions
+  |=  {syd/desk pan/pname}
+  =+  pd=(package-desk syd pan)
+  ~&  lab:.^(dome cv+/=[pd]/[(scot %da now.hid)])
+  [~ +>.$]
 ::
 ++  install-package-item
   |=  {syd/desk pack/package-item:package}
