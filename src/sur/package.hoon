@@ -12,8 +12,8 @@
   $%  {$package package-item}
       {$fileset fileset-item}
   ==
-++  package-item  purl
-++  fileset-item  {base/purl rels/(list path)}
+++  package-item  purl:eyre
+++  fileset-item  {base/purl:eyre rels/(list path)}
 ++  action
   $%  {$install d/desk p/package-item:package}
       {$installed d/desk p/pname}

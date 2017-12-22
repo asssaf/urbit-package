@@ -13,18 +13,18 @@
     =<  |=(jon/^json (need (package-parser jon)))
     |%
     ++  purl-parser
-      =+  jo
-      (ci |=(a/@t (epur a)) so)
+      =+  dejs-soft:format
+      (ci |=(a/@t (de-purl:html a)) so)
     ::
     ++  hash-parser
-      =+  jo
+      =+  dejs-soft:format
       (ci |=(a/@t (slaw %uv a)) so)
     ++  rels-parser
-      =+  jo
+      =+  dejs-soft:format
       (ar (cu |=(a/@t (stab a)) so))
     ::
     ++  union-parser
-      =+  jo
+      =+  dejs-soft:format
       |*  options/mold
       |*  {selector/@t parser/$-(options fist)}
       |=  jon/json
@@ -35,7 +35,7 @@
       ((parser type) jon)
     ::
     ++  item-parser
-      =+  jo
+      =+  dejs-soft:format
       =+  options=?($package $fileset)
       %+  (union-parser options)
         'type'
@@ -46,7 +46,7 @@
       ==
     ::
     ++  package-parser
-      =+  jo
+      =+  dejs-soft:format
       (ot name+so hash+hash-parser items+(ar item-parser) ~)
     --
   --

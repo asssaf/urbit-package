@@ -8,11 +8,11 @@
 |%
 ++  move  {bone card}
 ++  card
-  $%  {$info wire ship toro}
+  $%  {$info wire ship toro:clay}
       {$poke wire {ship $package} $package-action action:package}
-      {$hiss wire $~ mark {$purl purl}}
-      {$warp wire sock riff}
-      {$merg wire ship desk ship desk case germ}
+      {$hiss wire $~ mark {$purl purl:eyre}}
+      {$warp wire sock riff:clay}
+      {$merg wire ship desk ship desk case germ:clay}
   ==
 ++  pname  pname:package
 ++  installed-package
@@ -41,20 +41,20 @@
   ==
 --
 ::
-|_  {hid/bowl state}
+|_  {hid/bowl:gall state}
 ::++  prep  _`.
 ::
 ++  poke-noun
   |=  a/*
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   %-  poke-package-action
   ~|  [%strange-action a]
   ;;(action:package a)
 ::
 ++  poke-package-action
   |=  a/action:package
-  ^-  (quip move +>)
-  ?>  (team our.hid src.hid)      :: don't allow strangers
+  ^-  (quip move _+>)
+  ?>  (team:title our.hid src.hid)      :: don't allow strangers
   ?-  a
     {$install *}  (install-package-item +.a)
     {$installed *}  (get-installed-versions +.a)
@@ -63,13 +63,14 @@
   ==
 ++  help
   |=  a/@tas
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   =+  h=(~(get by action-help:package) a)
   ~&  ?~  h  action-help:package  [a u.h]
   [~ +>.$]
 ::
 ++  is-package-installed
   |=  {syd/desk pack/package:package}
+  ^-  @f
   =+  pd=(package-desk syd name.pack)
   ?.  (desk-exists pd)
     |
@@ -77,18 +78,19 @@
 ::
 ++  get-installed-versions
   |=  {syd/desk pan/pname}
+  ^-  (quip move _+>)
   =+  pd=(package-desk syd pan)
-  ~&  lab:.^(dome cv+/=[pd]/[(scot %da now.hid)])
+  ~&  lab:.^(dome:clay cv+/=[pd]/[(scot %da now.hid)])
   [~ +>.$]
 ::
 ++  install-package-item
   |=  {syd/desk pack/package-item:package}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   (install-package-items syd [%| pack]~)
 ::
 ++  install-package-items
   |=  {syd/desk packs/(list queue-package)}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   =+  ds=(fall (~(get by side) syd) *desk-state)
   =.  side
   %+  ~(put by side)  syd
@@ -106,7 +108,7 @@
 ::
 ++  install-next-package
   |=  syd/desk
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   =+  qp=(get-next-package syd)
   ?~  qp
     [~ +>.$]
@@ -126,6 +128,7 @@
 ::
 ++  pop-package-queue
   |=  syd/desk
+  ^-  (map desk desk-state)
   =+  ds=(~(got by side) syd)
   %+  ~(put by side)
     syd
@@ -133,7 +136,7 @@
 ::
 ++  install-package-dependencies
   |=  {syd/desk pack/package:package}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   =+  ds=(~(got by side) syd)
   :: check that the package is not already pending
   ?:  (~(has by work.ds) name.pack)
@@ -165,6 +168,7 @@
 ::
 ++  record-dependency
   |=  {syd/desk pan/pname has/@uv}
+  ^-  (map desk desk-state)
   =+  ds=(~(got by side) syd)
   :: find next %& package in the queue
   =+  queue=queue.ds
@@ -184,7 +188,7 @@
 :: install a package that has its dependencies installed already
 ++  install-package
   |=  {syd/desk pack/package:package}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   ~&  [%installing name.pack]
   :: get paths from all filesets
   =/  paths
@@ -214,6 +218,7 @@
 ::
 ++  register-work
   |=  {syd/desk pan/pname paths/(list path)}
+  ^-  (map desk desk-state)
   =+  ds=(fall (~(get by side) syd) *desk-state)
   %+  ~(put by side)
     syd
@@ -226,7 +231,7 @@
 ::
 ++  install-files
   |=  {syd/desk pan/pname files/(list {path mime})}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   =+  ds=(~(got by side) syd)
   =+  qp=-.queue.ds
   ?>  ?=({$& *} qp)
@@ -245,7 +250,7 @@
 ++  subscribe-for-next-commit
   |=  {way/wire syd/desk}
   ^-  move
-  =+  dom=.^(dome cv+(base syd))
+  =+  dom=.^(dome:clay cv+(base syd))
   =+  let=+(let.dom)
   =+  rav=[%sing %y ud+let /]
   [ost.hid %warp way [our.hid our.hid] [syd (some rav)]]
@@ -269,7 +274,8 @@
   [ost.hid %info /writing our.hid wr]
 ::
 ++  writ-install-file
-  |=  {way/wire rot/riot}
+  |=  {way/wire rot/riot:clay}
+  ^-  (quip move _+>)
   ?~  rot
     [~ +>.$]
   =+  syd=(snag 0 way)
@@ -290,7 +296,8 @@
   ==
 ::
 ++  writ-label
-  |=  {way/wire rot/riot}
+  |=  {way/wire rot/riot:clay}
+  ^-  (quip move _+>)
   ?~  rot
     [~ +>.$]
   =+  syd=(snag 0 way)
@@ -326,7 +333,7 @@
 ++  label-exists
   |=  {syd/desk label/@tas}
   ^-  @f
-  =+  dom=.^(dome cv+/=[syd]/[(scot %da now.hid)])
+  =+  dom=.^(dome:clay cv+/=[syd]/[(scot %da now.hid)])
   ?~  (~(get by lab.dom) label)
     |
   &
@@ -342,8 +349,9 @@
   (extend-url base.fs pax)
 ::
 ++  extend-url
-  |=  {url/purl pax/path}
-  (scan "{(earn url)}{(spud pax)}" auri:epur)
+  |=  {url/purl:eyre pax/path}
+  ^-  purl:eyre
+  (scan "{(en-purl:html url)}{(spud pax)}" auri:de-purl:html)
 ::
 :: if the last part of the path has an extension turn it into a mark
 :: e.g.:  /foo/bar/baz.js -> /foo/bar/baz/js
@@ -368,9 +376,9 @@
   (flop [i=mar [t=[i=fil t=rest]]])
 ::
 ++  fetch-url
-  |=  {way/wire mar/mark url/purl}
+  |=  {way/wire mar/mark url/purl:eyre}
   ^-  move
-  ~&  [%fetching url=(earn url)]
+  ~&  [%fetching url=(en-purl:html url)]
   [ost.hid %hiss way ~ mar [%purl url]]
 ::
 ++  base
@@ -380,10 +388,12 @@
 ::
 ++  relpath-to-abs
   |=  {syd/desk pax/path}
+  ^-  path
   (weld (base syd) pax)
 ::
 ++  desk-exists
   |=  syd/desk
+  ^-  @f
   =+  ark=.^(arch cy+(base syd))
   !=(~ dir.ark)
 ::
@@ -394,7 +404,7 @@
 ::
 ++  merge-deps
   |=  {syd/desk pan/pname first/?}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   =+  ds=(~(got by side) syd)
   =+  deps=(~(get ja deps.ds) pan)
   ?~  deps
@@ -425,6 +435,7 @@
 ::
 ++  mere-merge
   |=  {wir/wire are/(each (set path) (pair term tang))}
+  ^-  (quip move _+>)
   ?.  ?=({$.y *} are)
     ~&  [%merge-conflicts +.are]
     [~ +>.$]
@@ -434,6 +445,7 @@
 ::
 ++  sigh-package-package
   |=  {way/wire pack/package:package}
+  ^-  (quip move _+>)
   =+  syd=(snag 2 way)
   =+  queue-package=[%& pack]
   :: check that it's not already in the queue
@@ -449,8 +461,8 @@
   (install-package-dependencies syd pack)
 ::
 ++  sigh-httr
-  |=  {way/wire res/httr}
-  ^-  (quip move +>)
+  |=  {way/wire res/httr:eyre}
+  ^-  (quip move _+>)
   ~|  res
   ?>  =(2 (div p.res 100))
   ?.  =(/install/file (scag 2 way))
@@ -463,7 +475,7 @@
 ::
 ++  file-fetched
   |=  {syd/desk pan/pname pax/path mim/mime}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   =+  ds=(~(got by side) syd)
   =/  prom
   %+  ~(res pro (~(got by work.ds) pan))
@@ -480,13 +492,13 @@
   ==
   ?~  pending.prom
     :: all files received - install them
-    (install-files syd pan (~(tap by done.prom)))
+    (install-files syd pan ~(tap by done.prom))
   :: still waiting for other requests
   [~ +>.$]
 ::
 ++  sigh-tang
   |=  {way/wire tan/tang}
-  ^-  (quip move +>)
+  ^-  (quip move _+>)
   %-  (slog >%talk-sigh-tang< tan)
   [~ +>.$]
 --
