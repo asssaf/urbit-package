@@ -36,9 +36,9 @@ The package specification defines package metadata (name, etc.) as well as all t
 Unfortunately, you can't use `%package` to install itself if it's not already installed, so the traditional methods are available (once installed, you can use the `package.json` in this repository to install updated versions).
 
 ### Urbit Sync
-You can sync from `~bidner-hadlev-napler-pittev--livdyl-ritrev-ropwyc-bitpub`'s `%dist-package` desk.
+You can sync from the `%dist-package` desk on ![ship](https://img.shields.io/badge/dynamic/json.svg?label=ship&colorB=008bb8&prefix=&suffix=&query=$.our&uri=https://dist.u.replaythat.com/pages/badge.json).
 ```
-dojo> |sync %home ~bidner-hadlev-napler-pittev--livdyl-ritrev-ropwyc-bitpub %dist-package  
+dojo> |sync %home ~dist-ship %dist-package
 ```
 
 ### Manual
